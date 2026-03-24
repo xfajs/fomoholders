@@ -91,7 +91,7 @@ export default function App() {
           </button>
         </form>
         <p className="hint">
-          Output shows both: <b>% of total supply</b> and <b>% within top-holder bucket</b>.
+          Shows how much this token is held by wallets that have traded on FOMO.
         </p>
       </section>
 
@@ -123,12 +123,10 @@ export default function App() {
             <article className="terminal-card">
               <h3>SCAN DETAILS</h3>
               <ul className="kv-list">
-                <li><span>Mint</span><code>{short(result.mint)}</code></li>
-                <li><span>Method</span><code>{result.method}</code></li>
-                <li><span>FOMO UI Amount</span><code>{formatNum(result.fomoUiAmount)}</code></li>
-                <li><span>Total Supply UI</span><code>{formatNum(result.totalSupplyUi)}</code></li>
-                <li><span>Top-Holder Bucket UI</span><code>{formatNum(result.totalUiAmountTopHolders)}</code></li>
-                <li><span>Updated</span><code>{new Date(result.updatedAt).toLocaleString()}</code></li>
+                <li><span>Token</span><code>{short(result.mint)}</code></li>
+                <li><span>Held by FOMO wallets</span><code>{formatNum(result.fomoUiAmount)}</code></li>
+                <li><span>Total token supply</span><code>{formatNum(result.totalSupplyUi)}</code></li>
+                <li><span>Last updated</span><code>{new Date(result.updatedAt).toLocaleString()}</code></li>
               </ul>
             </article>
 
@@ -142,7 +140,7 @@ export default function App() {
                   </div>
                 ))}
               </div>
-              <p className="tiny">Next upgrade: return exact matched wallet rows from API for full table view.</p>
+              <p className="tiny">More breakdown tools coming soon.</p>
             </article>
           </section>
         </>
@@ -151,13 +149,13 @@ export default function App() {
       <section className="terminal-card explain">
         <h3>HOW IT WORKS</h3>
         <ol>
-          <li>We track wallets that paid FOMO fees.</li>
-          <li>When you paste a token, we check if those wallets hold it.</li>
-          <li>We show how much of the token they hold.</li>
+          <li>We track wallets that traded on FOMO.</li>
+          <li>When you paste a token, we check whether those wallets hold it.</li>
+          <li>We show simple percentages so you can judge concentration fast.</li>
         </ol>
         <ul>
-          <li>% held by FOMO wallets (of total supply)</li>
-          <li>% held by FOMO wallets (of top holders)</li>
+          <li>% of total supply held by FOMO wallets</li>
+          <li>% of top holders held by FOMO wallets</li>
           <li>How many FOMO wallets were found</li>
         </ul>
       </section>
