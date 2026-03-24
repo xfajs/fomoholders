@@ -159,6 +159,12 @@ export default function App() {
           <li>How many FOMO wallets were found</li>
         </ul>
       </section>
+
+      <section className="terminal-card donate">
+        <h3>SUPPORT THE PROJECT</h3>
+        <p>Donations help cover RPC + API costs.</p>
+        <code>94ZBnRkV9E5DJEFUZpBqFAT69Hh84VC2Ehd981HxCHCp</code>
+      </section>
     </main>
   )
 }
