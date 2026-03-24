@@ -103,11 +103,11 @@ export default function App() {
       if (hRes.ok && hData?.ok) setHistory(hData.points || [])
       else setHistory([])
 
-      // Offload token metadata + price to pump frontend API.
+      // Fetch token metadata via backend proxy to avoid browser CORS issues.
       try {
-        const pRes = await fetch(`https://frontend-api.pump.fun/coins/${mint}`)
+        const pRes = await fetch(`${API_BASE}/token-info/${mint}`)
         const pData = await pRes.json()
-        if (pRes.ok && pData) setTokenInfo(pData)
+        if (pRes.ok && pData?.ok) setTokenInfo(pData.data || null)
         else setTokenInfo(null)
       } catch {
         setTokenInfo(null)
