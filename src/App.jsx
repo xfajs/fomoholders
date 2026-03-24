@@ -42,6 +42,7 @@ export default function App() {
   const [walletLoading, setWalletLoading] = useState(false)
   const [walletResult, setWalletResult] = useState(null)
   const [health, setHealth] = useState(null)
+  const [history, setHistory] = useState([])
 
   const rows = useMemo(() => estimateFomoWalletRows(result), [result])
 
@@ -74,6 +75,11 @@ export default function App() {
       const data = await res.json()
       if (!res.ok || !data?.ok) throw new Error(data?.error || 'Query failed')
       setResult(data)
+
+      const hRes = await fetch(`${API_BASE}/history/${value}`)
+      const hData = await hRes.json()
+      if (hRes.ok && hData?.ok) setHistory(hData.points || [])
+      else setHistory([])
     } catch (err) {
       setResult(null)
       setError(err.message || 'Something broke')
@@ -220,6 +226,33 @@ export default function App() {
                 ))}
               </div>
             </article>
+          </section>
+
+          <section className="terminal-card chart-card">
+            <h3>FOMO CONCENTRATION TREND</h3>
+            {history.length >= 2 ? (
+              <svg viewBox="0 0 100 30" preserveAspectRatio="none" className="chart">
+                <polyline
+                  fill="none"
+                  stroke="#00ff88"
+                  strokeWidth="1.5"
+                  points={history
+                    .map((p, i) => {
+                      const x = (i / (history.length - 1)) * 100
+                      const vals = history.map((d) => Number(d.pctTotal || 0))
+                      const min = Math.min(...vals)
+                      const max = Math.max(...vals)
+                      const range = max - min || 1
+                      const y = 28 - (((Number(p.pctTotal || 0) - min) / range) * 24)
+                      return `${x},${y}`
+                    })
+                    .join(' ')}
+                />
+              </svg>
+            ) : (
+              <p className="tiny">Need more scans on this token to draw a trend line.</p>
+            )}
+            <p className="tiny">Tracking FOMO % of total supply over time.</p>
           </section>
 
           <section className="terminal-card holder-list">
