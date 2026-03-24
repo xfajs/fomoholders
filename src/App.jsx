@@ -87,9 +87,13 @@ export default function App() {
         <>
           <section className="stats-grid">
             <article className="panel stat-card">
-              <h3>FOMO % (Top Holders)</h3>
-              <div className="big">{result.fomoPctTopHolders.toFixed(2)}%</div>
-              <p>Concentration across top holder bucket.</p>
+              <h3>FOMO % (Total Supply)</h3>
+              <div className="big">
+                {typeof result.fomoPctTotalSupply === 'number'
+                  ? `${result.fomoPctTotalSupply.toFixed(2)}%`
+                  : 'N/A'}
+              </div>
+              <p>Based on full token supply.</p>
             </article>
 
             <article className="panel stat-card">
@@ -118,6 +122,9 @@ export default function App() {
               <li><b>Method:</b> {result.method}</li>
               <li><b>FOMO UI Amount:</b> {Number(result.fomoUiAmount).toLocaleString()}</li>
               <li><b>Total Top-Holder UI Amount:</b> {Number(result.totalUiAmountTopHolders).toLocaleString()}</li>
+              <li><b>FOMO % of Top Holders:</b> {Number(result.fomoPctTopHolders).toFixed(2)}%</li>
+              <li><b>Total Supply UI:</b> {typeof result.totalSupplyUi === 'number' ? Number(result.totalSupplyUi).toLocaleString() : 'N/A'}</li>
+              <li><b>FOMO % of Total Supply:</b> {typeof result.fomoPctTotalSupply === 'number' ? `${Number(result.fomoPctTotalSupply).toFixed(2)}%` : 'N/A'}</li>
               <li><b>Updated:</b> {new Date(result.updatedAt).toLocaleString()}</li>
             </ul>
           </section>
