@@ -259,7 +259,7 @@ h3 {
   display: grid;
   gap: 6px;
   margin-top: 8px;
-  max-height: 360px;
+  max-height: 620px;
   overflow: auto;
 }
 

@@ -62,30 +62,51 @@ export default function App() {
     }
   }, [])
 
-  async function onAnalyze(e) {
-    e.preventDefault()
-    const value = input.trim()
-    if (!value) return
+  useEffect(() => {
+    const m = window.location.pathname.match(/^\/token\/([A-Za-z0-9]+)$/)
+    if (!m) return
+    const mint = m[1]
+    setInput(mint)
+    runScan(mint)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  async function runScan(value) {
+    const mint = value.trim()
+    if (!mint) return
 
     setLoading(true)
     setError('')
 
     try {
-      const res = await fetch(`${API_BASE}/query/${value}`)
+      const res = await fetch(`${API_BASE}/query/${mint}`)
       const data = await res.json()
       if (!res.ok || !data?.ok) throw new Error(data?.error || 'Query failed')
       setResult(data)
 
-      const hRes = await fetch(`${API_BASE}/history/${value}`)
+      const hRes = await fetch(`${API_BASE}/history/${mint}`)
       const hData = await hRes.json()
       if (hRes.ok && hData?.ok) setHistory(hData.points || [])
       else setHistory([])
+
+      const nextPath = `/token/${mint}`
+      if (window.location.pathname !== nextPath) {
+        window.history.replaceState({}, '', nextPath)
+      }
     } catch (err) {
       setResult(null)
+      setHistory([])
       setError(err.message || 'Something broke')
     } finally {
       setLoading(false)
     }
+  }
+
+  async function onAnalyze(e) {
+    e.preventDefault()
+    const value = input.trim()
+    if (!value) return
+    await runScan(value)
   }
 
   async function onCheckWallet(e) {
@@ -159,7 +180,7 @@ export default function App() {
           </button>
         </form>
         <p className="hint">
-          Shows how much this token is held by wallets that have traded on FOMO.
+          Shows how much this token is held by wallets that have traded on FOMO. Shareable routes work like <code>/token/MINT</code>.
         </p>
 
         <form onSubmit={onCheckWallet} className="search-row wallet-row">
@@ -264,7 +285,7 @@ export default function App() {
               <span>Status</span>
             </div>
             <div className="holder-body">
-              {(result.holderList || []).slice(0, 40).map((h) => (
+              {(result.holderList || []).slice(0, 120).map((h) => (
                 <div key={`${h.rank}-${h.owner}`} className={`holder-row ${h.isFomoWallet ? 'fomo' : ''}`}>
                   <span>{h.rank}</span>
                   <code>{short(h.owner)}</code>
