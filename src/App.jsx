@@ -4,14 +4,33 @@ import './App.css'
 const API_BASE = 'https://api.fomoholders.app'
 
 function short(addr = '') {
-  if (addr.length < 10) return addr
-  return `${addr.slice(0, 4)}...${addr.slice(-4)}`
+  if (addr.length < 12) return addr
+  return `${addr.slice(0, 6)}...${addr.slice(-6)}`
 }
 
-function guessType(input) {
-  const v = input.trim()
-  if (!v) return 'unknown'
-  return 'mint' // keep simple for now
+function formatPct(v) {
+  if (typeof v !== 'number' || Number.isNaN(v)) return 'N/A'
+  return `${v.toFixed(2)}%`
+}
+
+function formatNum(v) {
+  if (typeof v !== 'number' || Number.isNaN(v)) return 'N/A'
+  return v.toLocaleString(undefined, { maximumFractionDigits: 2 })
+}
+
+function estimateFomoWalletRows(result) {
+  // v1 API does not return holder rows yet; show synthetic insight line.
+  if (!result) return []
+  return [
+    {
+      label: 'Matched wallets in top-holder scan',
+      value: result.fomoWalletHits,
+    },
+    {
+      label: 'Top holders scanned',
+      value: result.topHolderCount,
+    },
+  ]
 }
 
 export default function App() {
@@ -20,7 +39,7 @@ export default function App() {
   const [error, setError] = useState('')
   const [result, setResult] = useState(null)
 
-  const mode = useMemo(() => guessType(input), [input])
+  const rows = useMemo(() => estimateFomoWalletRows(result), [result])
 
   async function onAnalyze(e) {
     e.preventDefault()
@@ -33,103 +52,131 @@ export default function App() {
     try {
       const res = await fetch(`${API_BASE}/query/${value}`)
       const data = await res.json()
-      if (!res.ok || !data?.ok) {
-        throw new Error(data?.error || 'Failed to analyze token')
-      }
+      if (!res.ok || !data?.ok) throw new Error(data?.error || 'Query failed')
       setResult(data)
     } catch (err) {
-      setError(err.message || 'Something went wrong')
       setResult(null)
+      setError(err.message || 'Something broke')
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <main className="page">
-      <div className="glow glow-a" />
-      <div className="glow glow-b" />
-
-      <header className="hero">
-        <div className="badge">FOMO HOLDERS</div>
-        <h1>Track Smart Money Concentration</h1>
-        <p>
-          Paste a token CA and instantly see how much of the top holder supply belongs to indexed FOMO wallets.
-        </p>
+    <main className="terminal-page">
+      <header className="topbar">
+        <div className="brand-wrap">
+          <div className="dot" />
+          <div>
+            <h1>FOMO HOLDERS TERMINAL</h1>
+            <p>Realtime concentration scanner for indexed FOMO wallets</p>
+          </div>
+        </div>
+        <div className="status">
+          <span>API: online</span>
+          <span className="pipe">|</span>
+          <span>Indexer: cron active</span>
+        </div>
       </header>
 
-      <section className="panel search-panel">
+      <section className="terminal-card search">
         <form onSubmit={onAnalyze} className="search-row">
           <input
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Paste token CA (pump.fun / SPL)"
+            placeholder="Paste token CA (ex: J8PS...pump)"
           />
-          <button type="submit" disabled={loading || !input.trim()}>
-            {loading ? 'Scanning...' : 'Analyze'}
+          <button disabled={loading || !input.trim()} type="submit">
+            {loading ? 'SCANNING...' : 'RUN SCAN'}
           </button>
         </form>
-
-        <div className="meta-row">
-          <span>Mode: {mode}</span>
-          <span>API: {API_BASE}</span>
-          <span className="live">Indexer: Live</span>
-        </div>
+        <p className="hint">
+          Output shows both: <b>% of total supply</b> and <b>% within top-holder bucket</b>.
+        </p>
       </section>
 
       {error && (
-        <section className="panel error">
-          <strong>Error:</strong> {error}
+        <section className="terminal-card error">
+          <span>[ERROR]</span> {error}
         </section>
       )}
 
       {result && (
         <>
-          <section className="stats-grid">
-            <article className="panel stat-card">
-              <h3>FOMO % (Total Supply)</h3>
-              <div className="big">
-                {typeof result.fomoPctTotalSupply === 'number'
-                  ? `${result.fomoPctTotalSupply.toFixed(2)}%`
-                  : 'N/A'}
-              </div>
-              <p>Based on full token supply.</p>
+          <section className="grid-4">
+            <article className="terminal-card stat">
+              <label>FOMO % TOTAL SUPPLY</label>
+              <h2>{formatPct(result.fomoPctTotalSupply)}</h2>
             </article>
-
-            <article className="panel stat-card">
-              <h3>FOMO Wallet Hits</h3>
-              <div className="big">{result.fomoWalletHits}</div>
-              <p>Matched indexed wallets in holder set.</p>
+            <article className="terminal-card stat">
+              <label>FOMO % TOP HOLDERS</label>
+              <h2>{formatPct(result.fomoPctTopHolders)}</h2>
             </article>
-
-            <article className="panel stat-card">
-              <h3>Top Holders Scanned</h3>
-              <div className="big">{result.topHolderCount}</div>
-              <p>Fast mode coverage for this query.</p>
+            <article className="terminal-card stat">
+              <label>FOMO WALLET HITS</label>
+              <h2>{result.fomoWalletHits}</h2>
             </article>
-
-            <article className="panel stat-card">
-              <h3>Cache</h3>
-              <div className="big caps">{result.cache}</div>
-              <p>{result.indexCoverageHint}</p>
+            <article className="terminal-card stat">
+              <label>CACHE</label>
+              <h2>{String(result.cache || 'miss').toUpperCase()}</h2>
             </article>
           </section>
 
-          <section className="panel details">
-            <h3>Query Output</h3>
-            <ul>
-              <li><b>Mint:</b> {short(result.mint)}</li>
-              <li><b>Method:</b> {result.method}</li>
-              <li><b>FOMO UI Amount:</b> {Number(result.fomoUiAmount).toLocaleString()}</li>
-              <li><b>Total Top-Holder UI Amount:</b> {Number(result.totalUiAmountTopHolders).toLocaleString()}</li>
-              <li><b>FOMO % of Top Holders:</b> {Number(result.fomoPctTopHolders).toFixed(2)}%</li>
-              <li><b>Total Supply UI:</b> {typeof result.totalSupplyUi === 'number' ? Number(result.totalSupplyUi).toLocaleString() : 'N/A'}</li>
-              <li><b>FOMO % of Total Supply:</b> {typeof result.fomoPctTotalSupply === 'number' ? `${Number(result.fomoPctTotalSupply).toFixed(2)}%` : 'N/A'}</li>
-              <li><b>Updated:</b> {new Date(result.updatedAt).toLocaleString()}</li>
-            </ul>
+          <section className="grid-2">
+            <article className="terminal-card">
+              <h3>SCAN DETAILS</h3>
+              <ul className="kv-list">
+                <li><span>Mint</span><code>{short(result.mint)}</code></li>
+                <li><span>Method</span><code>{result.method}</code></li>
+                <li><span>FOMO UI Amount</span><code>{formatNum(result.fomoUiAmount)}</code></li>
+                <li><span>Total Supply UI</span><code>{formatNum(result.totalSupplyUi)}</code></li>
+                <li><span>Top-Holder Bucket UI</span><code>{formatNum(result.totalUiAmountTopHolders)}</code></li>
+                <li><span>Updated</span><code>{new Date(result.updatedAt).toLocaleString()}</code></li>
+              </ul>
+            </article>
+
+            <article className="terminal-card">
+              <h3>MATCH SUMMARY</h3>
+              <div className="table">
+                {rows.map((r) => (
+                  <div className="row" key={r.label}>
+                    <span>{r.label}</span>
+                    <strong>{r.value}</strong>
+                  </div>
+                ))}
+              </div>
+              <p className="tiny">Next upgrade: return exact matched wallet rows from API for full table view.</p>
+            </article>
           </section>
         </>
       )}
+
+      <section className="terminal-card explain">
+        <h3>HOW IT WORKS (END-TO-END)</h3>
+        <ol>
+          <li>
+            <b>Indexer cron runs</b> and scans recent signatures touching the FOMO fee token account
+            <code> HrTf9... </code>.
+          </li>
+          <li>
+            It batch-parses signatures via Helius and extracts sender wallets from <b>USDC transfers into HrTf...</b>.
+          </li>
+          <li>
+            Each detected wallet is stored in KV as <code>wallet:&lt;address&gt; = 1</code>.
+          </li>
+          <li>
+            Query endpoint pulls token top holders, maps token accounts to owner wallets, and intersects owners with the KV wallet set.
+          </li>
+          <li>
+            API returns:
+            <ul>
+              <li>FOMO % of top-holder bucket</li>
+              <li>FOMO % of total supply</li>
+              <li>wallet hit count + coverage hints</li>
+            </ul>
+          </li>
+        </ol>
+      </section>
     </main>
   )
 }
