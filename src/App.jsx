@@ -18,6 +18,14 @@ function formatNum(v) {
   return v.toLocaleString(undefined, { maximumFractionDigits: 2 })
 }
 
+function pickNumber(obj, keys = []) {
+  for (const k of keys) {
+    const v = obj?.[k]
+    if (typeof v === 'number' && !Number.isNaN(v)) return v
+  }
+  return null
+}
+
 function estimateFomoWalletRows(result) {
   // v1 API does not return holder rows yet; show synthetic insight line.
   if (!result) return []
@@ -43,9 +51,14 @@ export default function App() {
   const [walletResult, setWalletResult] = useState(null)
   const [health, setHealth] = useState(null)
   const [history, setHistory] = useState([])
+  const [tokenInfo, setTokenInfo] = useState(null)
   const [denseRows, setDenseRows] = useState(false)
 
   const rows = useMemo(() => estimateFomoWalletRows(result), [result])
+  const tokenPriceUsd = pickNumber(tokenInfo, ['usd_market_price', 'priceUsd', 'usdPrice', 'price'])
+  const tokenMcapUsd = pickNumber(tokenInfo, ['usd_market_cap', 'marketCapUsd', 'usdMarketCap', 'market_cap'])
+  const tokenName = tokenInfo?.name || tokenInfo?.coin_name || null
+  const tokenSymbol = tokenInfo?.symbol || tokenInfo?.ticker || null
 
   useEffect(() => {
     let alive = true
@@ -90,6 +103,16 @@ export default function App() {
       if (hRes.ok && hData?.ok) setHistory(hData.points || [])
       else setHistory([])
 
+      // Offload token metadata + price to pump frontend API.
+      try {
+        const pRes = await fetch(`https://frontend-api.pump.fun/coins/${mint}`)
+        const pData = await pRes.json()
+        if (pRes.ok && pData) setTokenInfo(pData)
+        else setTokenInfo(null)
+      } catch {
+        setTokenInfo(null)
+      }
+
       const nextPath = `/token/${mint}`
       if (window.location.pathname !== nextPath) {
         window.history.replaceState({}, '', nextPath)
@@ -97,6 +120,7 @@ export default function App() {
     } catch (err) {
       setResult(null)
       setHistory([])
+      setTokenInfo(null)
       setError(err.message || 'Something broke')
     } finally {
       setLoading(false)
@@ -236,6 +260,16 @@ export default function App() {
 
           </section>
 
+          <section className="terminal-card token-basics">
+            <h3>TOKEN BASICS</h3>
+            <div className="table">
+              <div className="row"><span>Name</span><strong>{tokenName || 'N/A'}</strong></div>
+              <div className="row"><span>Symbol</span><strong>{tokenSymbol || 'N/A'}</strong></div>
+              <div className="row"><span>Price (USD)</span><strong>{tokenPriceUsd != null ? `$${tokenPriceUsd.toLocaleString(undefined, { maximumFractionDigits: 8 })}` : 'N/A'}</strong></div>
+              <div className="row"><span>Market Cap (USD)</span><strong>{tokenMcapUsd != null ? `$${formatNum(tokenMcapUsd)}` : 'N/A'}</strong></div>
+            </div>
+          </section>
+
           <section className="grid-2">
             <article className="terminal-card">
               <h3>SCAN DETAILS</h3>
@@ -301,6 +335,7 @@ export default function App() {
               <span>#</span>
               <span>Wallet</span>
               <span>Amount</span>
+              <span>Value (USD)</span>
               <span>Status</span>
             </div>
             <div className="holder-body">
@@ -309,6 +344,7 @@ export default function App() {
                   <span>{h.rank}</span>
                   <code>{short(h.owner)}</code>
                   <span>{formatNum(h.uiAmount)}</span>
+                  <span>{tokenPriceUsd != null ? `$${formatNum(h.uiAmount * tokenPriceUsd)}` : 'N/A'}</span>
                   <strong>{h.isFomoWallet ? 'FOMO' : '-'}</strong>
                 </div>
               ))}
