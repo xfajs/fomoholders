@@ -8,3 +8,5 @@ What it does:
 - Displays index/query stats from the FOMO Holders API.
 
 This is the UI layer for `fomoholdersapi`.
+
+API repo: https://github.com/xfajs/fomoholdersapi
