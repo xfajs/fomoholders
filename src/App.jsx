@@ -152,30 +152,17 @@ export default function App() {
       )}
 
       <section className="terminal-card explain">
-        <h3>HOW IT WORKS (END-TO-END)</h3>
+        <h3>HOW IT WORKS</h3>
         <ol>
-          <li>
-            <b>Indexer cron runs</b> and scans recent signatures touching the FOMO fee token account
-            <code> HrTf9... </code>.
-          </li>
-          <li>
-            It batch-parses signatures via Helius and extracts sender wallets from <b>USDC transfers into HrTf...</b>.
-          </li>
-          <li>
-            Each detected wallet is stored in KV as <code>wallet:&lt;address&gt; = 1</code>.
-          </li>
-          <li>
-            Query endpoint pulls token top holders, maps token accounts to owner wallets, and intersects owners with the KV wallet set.
-          </li>
-          <li>
-            API returns:
-            <ul>
-              <li>FOMO % of top-holder bucket</li>
-              <li>FOMO % of total supply</li>
-              <li>wallet hit count + coverage hints</li>
-            </ul>
-          </li>
+          <li>We track wallets that paid FOMO fees.</li>
+          <li>When you paste a token, we check if those wallets hold it.</li>
+          <li>We show how much of the token they hold.</li>
         </ol>
+        <ul>
+          <li>% held by FOMO wallets (of total supply)</li>
+          <li>% held by FOMO wallets (of top holders)</li>
+          <li>How many FOMO wallets were found</li>
+        </ul>
       </section>
     </main>
   )
