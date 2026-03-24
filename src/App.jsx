@@ -38,6 +38,9 @@ export default function App() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [result, setResult] = useState(null)
+  const [walletInput, setWalletInput] = useState('')
+  const [walletLoading, setWalletLoading] = useState(false)
+  const [walletResult, setWalletResult] = useState(null)
   const [health, setHealth] = useState(null)
 
   const rows = useMemo(() => estimateFomoWalletRows(result), [result])
@@ -76,6 +79,27 @@ export default function App() {
       setError(err.message || 'Something broke')
     } finally {
       setLoading(false)
+    }
+  }
+
+  async function onCheckWallet(e) {
+    e.preventDefault()
+    const value = walletInput.trim()
+    if (!value) return
+
+    setWalletLoading(true)
+    setError('')
+
+    try {
+      const res = await fetch(`${API_BASE}/query/wallet/${value}`)
+      const data = await res.json()
+      if (!res.ok || !data?.ok) throw new Error(data?.error || 'Wallet check failed')
+      setWalletResult(data)
+    } catch (err) {
+      setWalletResult(null)
+      setError(err.message || 'Something broke')
+    } finally {
+      setWalletLoading(false)
     }
   }
 
@@ -131,6 +155,23 @@ export default function App() {
         <p className="hint">
           Shows how much this token is held by wallets that have traded on FOMO.
         </p>
+
+        <form onSubmit={onCheckWallet} className="search-row wallet-row">
+          <input
+            value={walletInput}
+            onChange={(e) => setWalletInput(e.target.value)}
+            placeholder="Check wallet (is this a FOMO wallet?)"
+          />
+          <button disabled={walletLoading || !walletInput.trim()} type="submit">
+            {walletLoading ? 'CHECKING...' : 'CHECK WALLET'}
+          </button>
+        </form>
+
+        {walletResult && (
+          <div className={`wallet-result ${walletResult.isFomoWallet ? 'yes' : 'no'}`}>
+            {short(walletResult.wallet)} → {walletResult.isFomoWallet ? 'FOMO WALLET ✅' : 'NOT FOMO ❌'}
+          </div>
+        )}
       </section>
 
       {error && (

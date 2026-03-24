@@ -139,6 +139,30 @@ button:disabled {
   font-size: 12px;
 }
 
+.wallet-row {
+  margin-top: 10px;
+}
+
+.wallet-result {
+  margin-top: 10px;
+  border: 1px solid #214d36;
+  border-radius: 10px;
+  padding: 10px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.wallet-result.yes {
+  background: rgba(11, 49, 31, 0.7);
+  color: #9dffc7;
+}
+
+.wallet-result.no {
+  background: rgba(50, 16, 16, 0.55);
+  border-color: #6b3030;
+  color: #ffbdbd;
+}
+
 .error {
   color: #ffc0c0;
   border-color: #6b3030;
