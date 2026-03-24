@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import './App.css'
 
 const API_BASE = 'https://api.fomoholders.app'
@@ -38,8 +38,25 @@ export default function App() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [result, setResult] = useState(null)
+  const [health, setHealth] = useState(null)
 
   const rows = useMemo(() => estimateFomoWalletRows(result), [result])
+
+  useEffect(() => {
+    let alive = true
+    ;(async () => {
+      try {
+        const res = await fetch(`${API_BASE}/health`)
+        const data = await res.json()
+        if (alive && data?.ok) setHealth(data)
+      } catch {
+        // ignore health errors in UI
+      }
+    })()
+    return () => {
+      alive = false
+    }
+  }, [])
 
   async function onAnalyze(e) {
     e.preventDefault()
@@ -73,13 +90,34 @@ export default function App() {
           </div>
         </div>
         <div className="status">
-          <span>API: online</span>
+          <span>API: {health?.ok ? 'online' : '...'}</span>
           <span className="pipe">|</span>
-          <span>Indexer: cron active</span>
+          <span>Indexed wallets: {health?.stats?.walletIndexSampleCount ?? '...'}</span>
+          <span className="pipe">|</span>
+          <span>Last tick: {health?.stats?.lastTickSummary?.indexed ?? '...'} tx</span>
         </div>
       </header>
 
       <section className="terminal-card search">
+        <div className="health-grid">
+          <div className="health-item">
+            <span>Indexed wallets (sample)</span>
+            <strong>{health?.stats?.walletIndexSampleCount ?? '...'}</strong>
+          </div>
+          <div className="health-item">
+            <span>Has more indexed</span>
+            <strong>{typeof health?.stats?.walletIndexHasMore === 'boolean' ? (health.stats.walletIndexHasMore ? 'YES' : 'NO') : '...'}</strong>
+          </div>
+          <div className="health-item">
+            <span>Last tick wallets added</span>
+            <strong>{health?.stats?.lastTickSummary?.walletsAdded ?? '...'}</strong>
+          </div>
+          <div className="health-item">
+            <span>Last tick time</span>
+            <strong>{health?.stats?.lastTickAt ? new Date(health.stats.lastTickAt).toLocaleTimeString() : '...'}</strong>
+          </div>
+        </div>
+
         <form onSubmit={onAnalyze} className="search-row">
           <input
             value={input}
