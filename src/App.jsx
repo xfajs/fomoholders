@@ -116,10 +116,7 @@ export default function App() {
               <label>FOMO WALLET HITS</label>
               <h2>{result.fomoWalletHits}</h2>
             </article>
-            <article className="terminal-card stat">
-              <label>CACHE</label>
-              <h2>{String(result.cache || 'miss').toUpperCase()}</h2>
-            </article>
+
           </section>
 
           <section className="grid-2">
