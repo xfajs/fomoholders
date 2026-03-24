@@ -219,8 +219,27 @@ export default function App() {
                   </div>
                 ))}
               </div>
-              <p className="tiny">More breakdown tools coming soon.</p>
             </article>
+          </section>
+
+          <section className="terminal-card holder-list">
+            <h3>TOKEN HOLDER LIST</h3>
+            <div className="holder-head row-lite">
+              <span>#</span>
+              <span>Wallet</span>
+              <span>Amount</span>
+              <span>Status</span>
+            </div>
+            <div className="holder-body">
+              {(result.holderList || []).slice(0, 40).map((h) => (
+                <div key={`${h.rank}-${h.owner}`} className={`holder-row ${h.isFomoWallet ? 'fomo' : ''}`}>
+                  <span>{h.rank}</span>
+                  <code>{short(h.owner)}</code>
+                  <span>{formatNum(h.uiAmount)}</span>
+                  <strong>{h.isFomoWallet ? 'FOMO' : '-'}</strong>
+                </div>
+              ))}
+            </div>
           </section>
         </>
       )}
