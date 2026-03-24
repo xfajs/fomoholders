@@ -245,6 +245,26 @@ h3 {
   margin-top: 10px;
 }
 
+.holder-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.holder-toolbar h3 { margin: 0; }
+
+.holder-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.holder-actions button {
+  padding: 7px 10px;
+  font-size: 11px;
+}
+
 .row-lite {
   display: grid;
   grid-template-columns: 56px 1fr 160px 90px;
@@ -272,6 +292,11 @@ h3 {
   border-radius: 10px;
   padding: 10px;
   font-size: 12px;
+}
+
+.holder-row.dense {
+  padding: 6px 8px;
+  font-size: 11px;
 }
 
 .holder-row code { color: #d8ffe8; }

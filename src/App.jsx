@@ -43,6 +43,7 @@ export default function App() {
   const [walletResult, setWalletResult] = useState(null)
   const [health, setHealth] = useState(null)
   const [history, setHistory] = useState([])
+  const [denseRows, setDenseRows] = useState(false)
 
   const rows = useMemo(() => estimateFomoWalletRows(result), [result])
 
@@ -127,6 +128,16 @@ export default function App() {
       setError(err.message || 'Something broke')
     } finally {
       setWalletLoading(false)
+    }
+  }
+
+  async function copyShareLink() {
+    if (!result?.mint) return
+    const link = `${window.location.origin}/token/${result.mint}`
+    try {
+      await navigator.clipboard.writeText(link)
+    } catch {
+      // ignore clipboard issues
     }
   }
 
@@ -277,7 +288,15 @@ export default function App() {
           </section>
 
           <section className="terminal-card holder-list">
-            <h3>TOKEN HOLDER LIST</h3>
+            <div className="holder-toolbar">
+              <h3>TOKEN HOLDER LIST</h3>
+              <div className="holder-actions">
+                <button type="button" onClick={copyShareLink}>COPY SHARE LINK</button>
+                <button type="button" onClick={() => setDenseRows((v) => !v)}>
+                  {denseRows ? 'COMFY ROWS' : 'DENSE ROWS'}
+                </button>
+              </div>
+            </div>
             <div className="holder-head row-lite">
               <span>#</span>
               <span>Wallet</span>
@@ -286,7 +305,7 @@ export default function App() {
             </div>
             <div className="holder-body">
               {(result.holderList || []).slice(0, 120).map((h) => (
-                <div key={`${h.rank}-${h.owner}`} className={`holder-row ${h.isFomoWallet ? 'fomo' : ''}`}>
+                <div key={`${h.rank}-${h.owner}`} className={`holder-row ${h.isFomoWallet ? 'fomo' : ''} ${denseRows ? 'dense' : ''}`}>
                   <span>{h.rank}</span>
                   <code>{short(h.owner)}</code>
                   <span>{formatNum(h.uiAmount)}</span>
