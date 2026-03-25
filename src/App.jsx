@@ -178,7 +178,7 @@ export default function App() {
         <div className="status">
           <span>API: {health?.ok ? 'online' : '...'}</span>
           <span className="pipe">|</span>
-          <span>Indexed wallets: {health?.stats?.walletIndexSampleCount ?? '...'}</span>
+          <span>Indexed wallets: {health?.stats?.walletIndexCount ?? health?.stats?.walletIndexSampleCount ?? '...'}</span>
           <span className="pipe">|</span>
           <span>Last tick: {health?.stats?.lastTickSummary?.indexed ?? '...'} tx</span>
         </div>
@@ -187,12 +187,12 @@ export default function App() {
       <section className="terminal-card search">
         <div className="health-grid">
           <div className="health-item">
-            <span>Indexed wallets (sample)</span>
-            <strong>{health?.stats?.walletIndexSampleCount ?? '...'}</strong>
+            <span>Indexed wallets</span>
+            <strong>{health?.stats?.walletIndexCount ?? health?.stats?.walletIndexSampleCount ?? '...'}</strong>
           </div>
           <div className="health-item">
-            <span>Has more indexed</span>
-            <strong>{typeof health?.stats?.walletIndexHasMore === 'boolean' ? (health.stats.walletIndexHasMore ? 'YES' : 'NO') : '...'}</strong>
+            <span>Count pages scanned</span>
+            <strong>{health?.stats?.walletCountPagesScanned ?? '...'}</strong>
           </div>
           <div className="health-item">
             <span>Last tick wallets added</span>
