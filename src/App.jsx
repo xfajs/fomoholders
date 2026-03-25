@@ -372,6 +372,12 @@ export default function App() {
         <p>Donations help cover RPC + API costs.</p>
         <code>94ZBnRkV9E5DJEFUZpBqFAT69Hh84VC2Ehd981HxCHCp</code>
       </section>
+
+      <footer className="footer-links">
+        <a href="https://github.com/xfajs/fomoholders" target="_blank" rel="noreferrer">Frontend GitHub</a>
+        <span>•</span>
+        <a href="https://github.com/xfajs/fomoholdersapi" target="_blank" rel="noreferrer">API GitHub</a>
+      </footer>
     </main>
   )
 }
