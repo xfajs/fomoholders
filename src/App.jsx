@@ -377,6 +377,8 @@ export default function App() {
         <a href="https://github.com/xfajs/fomoholders" target="_blank" rel="noreferrer">Frontend GitHub</a>
         <span>•</span>
         <a href="https://github.com/xfajs/fomoholdersapi" target="_blank" rel="noreferrer">API GitHub</a>
+        <span>•</span>
+        <a href="https://x.com/zxfa_sol" target="_blank" rel="noreferrer">Developer</a>
       </footer>
     </main>
   )
